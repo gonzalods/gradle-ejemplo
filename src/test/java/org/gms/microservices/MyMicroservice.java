@@ -1,15 +1,15 @@
 package org.gms.microservices;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
-import com.google.inject.Module;
-import com.google.inject.Scopes;
+import com.google.inject.*;
 import com.typesafe.config.Config;
+import org.gms.microservices.discovery.ClientFactory;
 import org.jboss.resteasy.plugins.guice.ext.RequestScopeModule;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -27,23 +27,29 @@ public class MyMicroservice extends Microservice{
             new RequestScopeModule(){
                 @Override
                 protected void configure() {
-                    bind(ConfigurationResource.class).in(Scopes.SINGLETON);
+                    bind(DataResource.class).in(Scopes.SINGLETON);
+                }
+
+                @Provides
+                @Singleton
+                public OtherMicroserviceClient otherMicroserviceClient(ClientFactory factory){
+                    return factory.buildClient("other-microservice", OtherMicroserviceClient.class);
                 }
             }
         };
     }
 
     @Path("/")
-    public static class ConfigurationResource{
+    public static class DataResource{
 
         @Inject
-        Config config;
+        OtherMicroserviceClient otherMicroserviceClient;
 
         @GET
         @Produces("application/json")
-        public Map<String,String> getResource(){
-            return ImmutableMap.of("sample.config",config.getString("sample.config"),
-                    "microservice.name",config.getString("microservice.name"));
+        public Map<String,Map<String,String>> getOtherData() throws IOException{
+            return ImmutableMap.of("retrivedFromOtherMicroservice",
+                    otherMicroserviceClient.getData().execute().body());
         }
     }
 }

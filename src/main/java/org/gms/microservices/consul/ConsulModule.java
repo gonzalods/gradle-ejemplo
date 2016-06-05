@@ -7,6 +7,7 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.orbitz.consul.Consul;
 import com.typesafe.config.Config;
+import org.gms.microservices.discovery.ClientFactory;
 import org.gms.microservices.discovery.ConsulDicovery;
 import org.gms.microservices.discovery.ServiceDiscovery;
 
@@ -19,6 +20,7 @@ public class ConsulModule extends AbstractModule{
         bind(ConsulRegistration.class).in(Scopes.SINGLETON);
         bind(ConsulLifeCicleListener.class).in(Scopes.SINGLETON);
         bind(ServiceDiscovery.class).to(ConsulDicovery.class).in(Scopes.SINGLETON);
+        bind(ClientFactory.class).in(Scopes.SINGLETON);
     }
 
     @Provides
