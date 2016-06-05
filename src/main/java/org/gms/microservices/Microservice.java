@@ -10,6 +10,7 @@ import com.typesafe.config.Config;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.gms.microservices.consul.ConsulLifeCicleListener;
 import org.jboss.resteasy.plugins.guice.GuiceResteasyBootstrapServletContextListener;
 
 import javax.servlet.DispatcherType;
@@ -41,10 +42,23 @@ public abstract class Microservice {
         context.addServlet(DefaultServlet.class,"/*");
 
         try {
+            server.addLifeCycleListener(injector.getInstance(ConsulLifeCicleListener.class));
+            server.setStopAtShutdown(true);
             server.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run() {
+                try {
+                    server.stop();
+                    System.out.println("Server Stopping");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         try {
             server.join();
         } catch (InterruptedException e) {

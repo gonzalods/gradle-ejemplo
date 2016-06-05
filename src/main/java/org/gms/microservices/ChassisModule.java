@@ -5,6 +5,8 @@ import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 import org.gms.microservices.config.ConfigModule;
+import org.gms.microservices.consul.ConsulModule;
+import org.gms.microservices.health.HealthModule;
 import org.jboss.resteasy.plugins.guice.GuiceResteasyBootstrapServletContextListener;
 import org.jboss.resteasy.plugins.guice.ext.RequestScopeModule;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
@@ -31,6 +33,8 @@ public class ChassisModule extends RequestScopeModule {
 
         // Uses the given module to configure more bindings.
         install(new ConfigModule());
+        install(new HealthModule());
+        install(new ConsulModule());
 
         install(new ServletModule(){
             //El ServletModule se puede ver como el sustituto programático de web.xml
